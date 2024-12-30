@@ -19,7 +19,6 @@ func main() {
 func root(args []string) error {
 	commands := []cli.Command{
 		cli.NewParseCommand(),
-		cli.NewProjectCommand(),
 	}
 
 	if len(args) < 2 {

@@ -1,0 +1,19 @@
+# Comment outside
+namespace = test
+test.1 = {{
+	type = character_event
+	trigger = {
+		scope:character = character.123
+		has_dlc = "DLC1"
+	}
+	effect = {
+		if = {
+			limit = {
+				# Comment inside
+				ai = yes
+				gold >= 100
+			}
+			add_gold = -100
+		}
+	}
+}

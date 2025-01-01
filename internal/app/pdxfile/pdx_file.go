@@ -22,68 +22,73 @@ func ParseFile(entry *files.FileEntry) (*ast.AST, error) {
 		return nil, fmt.Errorf("reading file: %w", err)
 	}
 
-	var errs []*report.DiagnosticItem
+	diagnostics := []*report.DiagnosticItem{}
 
-	token_stream, lexer_errs := lexer.Scan(entry, content)
+	tokenStream, lexerErrors := lexer.Scan(entry, content)
+	diagnostics = append(diagnostics, lexerErrors...)
 
-	// utils.SaveJSON(token_stream, "tokenstream.json")
-
-	errs = append(errs, lexer_errs...)
-
-	file_block, parser_errs := parser.Parse(token_stream)
-	errs = append(errs, parser_errs...)
+	fileBlock, parserErrors := parser.Parse(tokenStream)
+	diagnostics = append(diagnostics, parserErrors...)
 
 	ast := &ast.AST{
 		Filename: entry.FileName(),
 		Fullpath: entry.FullPath(),
-		Block:    file_block,
+		Block:    fileBlock,
 	}
 
-	finalize(errs)
+	finalize(diagnostics)
 
 	return ast, nil
 }
 
 func finalize(errs []*report.DiagnosticItem) {
-
-	file_cache := cache.NewFileCache()
+	fileCache := cache.NewFileCache()
 
 	for _, err := range errs {
-		var c *color.Color
-		switch err.Severity {
-		case severity.Error:
-			c = color.New(color.FgRed)
-		case severity.Warning:
-			c = color.New(color.FgYellow)
-		case severity.Info:
-			c = color.New(color.FgCyan)
-		case severity.Critical:
-			c = color.New(color.FgHiMagenta)
-		}
-		filename, _ := err.Pointer.Loc.Filename()
-		column := err.Pointer.Loc.Column
-		line := err.Pointer.Loc.Line
+		printDiagnostic(err, fileCache)
+	}
+}
 
-		err_line := getErrorLine(file_cache, err, column)
+func printDiagnostic(err *report.DiagnosticItem, fileCache *cache.FileCache) {
+	color := getSeverityColor(err.Severity)
+	filename, _ := err.Pointer.Loc.Filename()
+	column := err.Pointer.Loc.Column
+	line := err.Pointer.Loc.Line
 
-		if err.Pointer.Loc.Line == 1 && err.Pointer.Loc.Column == 1 {
-			c.Println(fmt.Sprintf("[%s:%d:%d]: %s", filename, line, column, err.Msg))
+	if err.Pointer.Loc.Line == 1 && err.Pointer.Loc.Column == 1 {
+		color.Printf("[%s:%d:%d]: %s\n", filename, line, column, err.Msg)
+		return
+	}
 
-			continue
-		}
+	errLine := getErrorLine(fileCache, err, column)
+	color.Printf("[%s:%d:%d]: %s, got %s\n", filename, line, column, err.Msg, strconv.Quote(errLine))
+}
 
-		c.Println(fmt.Sprintf("[%s:%d:%d]: %s, got %s", filename, line, column, err.Msg, strconv.Quote(err_line)))
+func getSeverityColor(sev severity.Severity) *color.Color {
+	switch sev {
+	case severity.Error:
+		return color.New(color.FgRed)
+	case severity.Warning:
+		return color.New(color.FgYellow)
+	case severity.Info:
+		return color.New(color.FgCyan)
+	case severity.Critical:
+		return color.New(color.FgHiMagenta)
+	default:
+		return color.New(color.Reset)
 	}
 }
 
 func getErrorLine(fileCache *cache.FileCache, err *report.DiagnosticItem, column uint16) string {
-	lineStart := fileCache.GetLine(&err.Pointer.Loc)
+	// Get the full line of text where the error occurred
+	line := fileCache.GetLine(&err.Pointer.Loc)
 
-	// replace tabs to spaces, because loc sees \t as 4 symbols...
-	// todo: do something
-	spacedLine := strings.ReplaceAll(lineStart, "\t", "    ")
+	// Normalize tabs to spaces for consistent column counting
+	normalizedLine := strings.ReplaceAll(line, "\t", "    ")
 
+	// Calculate the end index of the error span
 	errorEndIndex := column + uint16(err.Pointer.Length) - 1
 
-	return spacedLine[:errorEndIndex]
+	// Return the portion of the line up to the error end
+	return normalizedLine[:errorEndIndex]
 }

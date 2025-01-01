@@ -2,43 +2,36 @@ package utils
 
 import (
 	"fmt"
-	"io"
 	"os"
 )
 
-func ReadFileWithUTF8BOM(filePath string) ([]byte, error) {
-	// Open the file
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("could not open file: %w", err)
-	}
-	defer file.Close()
+// Constants representing a UTF-8 BOM.
+// https://en.wikipedia.org/wiki/Byte_order_mark#UTF-8
+const (
+	bomByte1 = 0xEF
+	bomByte2 = 0xBB
+	bomByte3 = 0xBF
+	bomSize  = 3
+)
 
-	// Read the first 3 bytes to check for UTF-8 BOM
-	bom := make([]byte, 3)
-	n, err := file.Read(bom)
-	if err != nil && err != io.EOF {
+// ReadFileWithUTF8BOM reads a file, returning its contents as bytes.
+// If a UTF-8 BOM (0xEF, 0xBB, 0xBF) is present, it's removed.
+func ReadFileWithUTF8BOM(filePath string) ([]byte, error) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
 		return nil, fmt.Errorf("could not read file: %w", err)
 	}
 
-	// Check for UTF-8 BOM (0xEF, 0xBB, 0xBF)
-	hasBOM := n >= 3 && bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF
-
-	// Reset the file offset to after BOM if present, else to the beginning
-	offset := int64(0)
-	if hasBOM {
-		offset = 3
+	if hasUTF8BOM(content) {
+		return content[bomSize:], nil
 	}
-	_, err = file.Seek(offset, io.SeekStart)
-	if err != nil {
-		return nil, fmt.Errorf("could not seek file: %w", err)
-	}
-
-	// Read the rest of the file
-	content, err := io.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("could not read file content: %w", err)
-	}
-
 	return content, nil
+}
+
+// hasUTF8BOM checks if the provided data begins with the UTF-8 BOM bytes.
+func hasUTF8BOM(data []byte) bool {
+	return len(data) >= bomSize &&
+		data[0] == bomByte1 &&
+		data[1] == bomByte2 &&
+		data[2] == bomByte3
 }

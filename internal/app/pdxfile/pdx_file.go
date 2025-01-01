@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/unLomTrois/gock3/internal/app/files"
 	"github.com/unLomTrois/gock3/internal/app/lexer"
 	"github.com/unLomTrois/gock3/internal/app/parser"
@@ -13,7 +12,6 @@ import (
 	"github.com/unLomTrois/gock3/internal/app/utils"
 	"github.com/unLomTrois/gock3/pkg/cache"
 	"github.com/unLomTrois/gock3/pkg/report"
-	"github.com/unLomTrois/gock3/pkg/report/severity"
 )
 
 func ParseFile(entry *files.FileEntry) (*ast.AST, error) {
@@ -50,7 +48,7 @@ func finalize(errs []*report.DiagnosticItem) {
 }
 
 func printDiagnostic(err *report.DiagnosticItem, fileCache *cache.FileCache) {
-	color := getSeverityColor(err.Severity)
+	color := err.Severity.Color()
 	filename, _ := err.Pointer.Loc.Filename()
 	column := err.Pointer.Loc.Column
 	line := err.Pointer.Loc.Line
@@ -62,21 +60,6 @@ func printDiagnostic(err *report.DiagnosticItem, fileCache *cache.FileCache) {
 
 	errLine := getErrorLine(fileCache, err, column)
 	color.Printf("[%s:%d:%d]: %s, got %s\n", filename, line, column, err.Msg, strconv.Quote(errLine))
-}
-
-func getSeverityColor(sev severity.Severity) *color.Color {
-	switch sev {
-	case severity.Error:
-		return color.New(color.FgRed)
-	case severity.Warning:
-		return color.New(color.FgYellow)
-	case severity.Info:
-		return color.New(color.FgCyan)
-	case severity.Critical:
-		return color.New(color.FgHiMagenta)
-	default:
-		return color.New(color.Reset)
-	}
 }
 
 func getErrorLine(fileCache *cache.FileCache, err *report.DiagnosticItem, column uint16) string {

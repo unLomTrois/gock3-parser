@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"testing"
 
 	"github.com/unLomTrois/gock3/internal/app/cli"
@@ -149,6 +150,10 @@ func TestParseCommand_ValidFile_WithAstFlag(t *testing.T) {
 // One way to do this is by providing a file that triggers a parse error.
 // You may need to modify the parse logic or use a mock to force an error.
 func TestParseCommand_FileParseFailure(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("chmod 0000 doesn't work on windows")
+	}
+
 	// Here we create an unreadable file (permissions 000)
 	// so it fails during parseFile -> pdxfile.ParseFile
 	tmpFile, err := os.CreateTemp("", "testfile-*.txt")

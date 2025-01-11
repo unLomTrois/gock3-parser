@@ -26,9 +26,6 @@ vendor/
 # configs
 configs/*.json
 
-# vscode
-.vscode
-
 tmp
 
 **/tokenstream.json

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/unLomTrois/gock3/internal/app/files"
+	"github.com/unLomTrois/gock3/internal/app/parser/ast"
 	"github.com/unLomTrois/gock3/internal/app/pdxfile"
 	"github.com/unLomTrois/gock3/internal/app/utils"
 )
@@ -16,38 +17,39 @@ type ParseCommand struct {
 	astFilepath string
 }
 
+// NewParseCommand initializes a new ParseCommand with the appropriate flags.
 func NewParseCommand() *ParseCommand {
-	command := &ParseCommand{
-		flagset: flag.NewFlagSet("parse", flag.ExitOnError),
+	pc := &ParseCommand{
+		flagset: flag.NewFlagSet("parse", flag.ContinueOnError),
 	}
 
-	command.flagset.StringVar(
-		&command.astFilepath,
+	// CLI usage example:
+	//   gock3 parse file.txt --save-ast ast.json
+	pc.flagset.StringVar(
+		&pc.astFilepath,
 		"save-ast",
 		"",
-		"Save the AST to a file\ngock3 parse file.txt --save-ast ast.json",
+		"Save the AST to a file\nExample: --save-ast ast.json",
 	)
 
-	return command
+	return pc
 }
 
-func (command *ParseCommand) Name() string {
-	return command.flagset.Name()
+// Name returns the name of the command.
+func (pc *ParseCommand) Name() string {
+	return pc.flagset.Name()
 }
 
-func (command *ParseCommand) Description() string {
+// Description returns a short description of what the command does.
+func (pc *ParseCommand) Description() string {
 	return "Parse a file and generate the output files"
 }
 
-// Run parses the input file and generates the output files
-// args is the list of command line arguments
-// The first argument is the file path
-func (command *ParseCommand) Run(args []string) error {
-	if err := command.validateArgs(args); err != nil {
-		return err
-	}
-
-	if err := command.flagset.Parse(args[1:]); err != nil {
+// Run is the entry point for the 'parse' command. It parses the arguments,
+// validates them, reads the file, and handles the resulting AST.
+func (pc *ParseCommand) Run(args []string) error {
+	// 1. Parse the CLI arguments
+	if err := pc.parseArgs(args); err != nil {
 		return err
 	}
 
@@ -57,35 +59,61 @@ func (command *ParseCommand) Run(args []string) error {
 		return err
 	}
 
-	return command.parse(fullpath)
-}
-
-func (command *ParseCommand) validateArgs(args []string) error {
-	if len(args) == 0 {
-		return fmt.Errorf("not enough arguments")
+	// 2. Parse the file to get the AST
+	ast, err := pc.parseFile(fullpath)
+	if err != nil {
+		return err
 	}
+
+	// 3. Handle the AST (save to file if needed)
+	if err := pc.handleAST(ast); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (command *ParseCommand) parse(fullpath string) error {
+// parseArgs validates and parses the incoming arguments using the command's flagset.
+func (pc *ParseCommand) parseArgs(args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("not enough arguments (no file specified)")
+	}
+
+	// Skip args[0] (the file path) when parsing flags
+	if err := pc.flagset.Parse(args[1:]); err != nil {
+		return fmt.Errorf("failed to parse flags: %w", err)
+	}
+
+	return nil
+}
+
+// parseFile reads and parses the specified file into an AST structure.
+func (pc *ParseCommand) parseFile(fullpath string) (*ast.AST, error) {
 	fileEntry := files.NewFileEntry(fullpath, files.FileKind(files.Mod))
 
 	ast, err := pdxfile.ParseFile(fileEntry)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("failed to parse file: %w", err)
 	}
 
-	if command.astFilepath == "" {
+	return ast, nil
+}
+
+// handleAST handles the logic for the parsed AST, such as saving it to disk.
+func (pc *ParseCommand) handleAST(ast *ast.AST) error {
+	// If no --save-ast path is provided, nothing more to do
+	if pc.astFilepath == "" {
 		return nil
 	}
 
-	if err := utils.SaveJSON(ast, command.astFilepath); err != nil {
+	// Otherwise, save the AST to the specified file
+	if err := utils.SaveJSON(ast, pc.astFilepath); err != nil {
 		return fmt.Errorf("failed to save AST: %w", err)
 	}
 
-	absPath, err := filepath.Abs(command.astFilepath)
+	absPath, err := filepath.Abs(pc.astFilepath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
 	log.Println("Saved parse tree to", absPath)

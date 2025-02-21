@@ -15,8 +15,8 @@ type Parser struct {
 	*report.ErrorManager
 }
 
-// New creates a new Parser instance.
-func New(tokenstream *tokens.TokenStream) *Parser {
+// NewParser creates a new Parser instance.
+func NewParser(tokenstream *tokens.TokenStream) *Parser {
 	p := &Parser{
 		tokenstream:  tokenstream,
 		ErrorManager: report.NewErrorManager(),
@@ -31,7 +31,7 @@ func New(tokenstream *tokens.TokenStream) *Parser {
 
 // Parse processes the token stream and returns the AST along with any diagnostic errors.
 func Parse(token_stream *tokens.TokenStream) (*ast.FileBlock, []*report.DiagnosticItem) {
-	p := New(token_stream)
+	p := NewParser(token_stream)
 	fileBlock := p.fileBlock()
 	return fileBlock, p.Errors()
 }

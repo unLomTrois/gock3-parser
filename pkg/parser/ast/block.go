@@ -5,12 +5,12 @@ import (
 )
 
 // type that can be a Block or a Token
-type BV interface {
-	IsBV()
+type BlockOrValue interface {
+	IsBlockOrValue()
 }
 
 type Block interface {
-	BV
+	BlockOrValue
 	IsBlock()
 }
 
@@ -23,8 +23,8 @@ type FieldBlock struct {
 	Loc    tokens.Loc `json:"-"`
 }
 
-func (fb *FieldBlock) IsBlock() {}
-func (fb *FieldBlock) IsBV()    {}
+func (fb *FieldBlock) IsBlock()        {}
+func (fb *FieldBlock) IsBlockOrValue() {}
 func (fb *FieldBlock) GetValues() []*Field {
 	return fb.Values
 }
@@ -123,11 +123,11 @@ type TokenBlock struct {
 	Values []*tokens.Token `json:"tokens"`
 }
 
-func (tb *TokenBlock) IsBlock() {}
-func (tb *TokenBlock) IsBV()    {}
+func (tb *TokenBlock) IsBlock()        {}
+func (tb *TokenBlock) IsBlockOrValue() {}
 
 type EmptyValue struct {
 	Loc tokens.Loc `json:"-"`
 }
 
-func (ev EmptyValue) IsBV() {}
+func (ev EmptyValue) IsBlockOrValue() {}

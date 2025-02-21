@@ -19,7 +19,7 @@ func New(value string, tokenType TokenType, loc Loc) *Token {
 	}
 }
 
-func (t *Token) IsBV() {}
+func (t *Token) IsBlockOrValue() {}
 
 func (t *Token) String() string {
 	return fmt.Sprintf("type:\t%v,\tvalue:\t%v", t.Type, strconv.Quote(string(t.Value)))

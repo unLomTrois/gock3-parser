@@ -156,7 +156,7 @@ func (p *Parser) Operator() *tokens.Token {
 }
 
 // Value parses the value of a field and returns the corresponding AST node.
-func (p *Parser) Value() ast.BV {
+func (p *Parser) Value() ast.BlockOrValue {
 	if p.currentToken == nil {
 		errMsg := errValueExpectedEOF
 		err := report.FromLoc(*p.loc, severity.Error, errMsg)
@@ -182,7 +182,7 @@ func (p *Parser) Value() ast.BV {
 }
 
 // EmptyValue returns an empty value AST node.
-func (p *Parser) EmptyValue() ast.BV {
+func (p *Parser) EmptyValue() ast.BlockOrValue {
 	return ast.EmptyValue{
 		Loc: *p.loc,
 	}

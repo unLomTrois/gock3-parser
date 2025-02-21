@@ -21,7 +21,7 @@ type Lexer struct {
 	*report.ErrorManager
 }
 
-// NewLexer creates a new Lexer instance
+// NewLexer creates a new Lexer instance.
 func NewLexer(file files.ParadoxFile, text []byte) *Lexer {
 	return &Lexer{
 		file:           file,
@@ -34,115 +34,100 @@ func NewLexer(file files.ParadoxFile, text []byte) *Lexer {
 	}
 }
 
-// NormalizeText trims spaces and converts CRLF to LF
+// NormalizeText replaces CRLF with LF.
 func NormalizeText(text []byte) []byte {
+	// Optionally, you could trim spaces if needed:
 	// text = bytes.TrimSpace(text)
-	text = bytes.ReplaceAll(text, []byte("\r\n"), []byte("\n"))
-	return text
+	return bytes.ReplaceAll(text, []byte("\r\n"), []byte("\n"))
 }
 
-// hasMoreTokens checks if there are more tokens to process by comparing the current cursor position with the text length
+// hasMoreTokens checks if there are unprocessed tokens.
 func (lex *Lexer) hasMoreTokens() bool {
 	return lex.cursor < len(lex.text)
 }
 
-// Scan tokenizes the entire input text
+// Scan tokenizes the entire input text.
 func Scan(file files.ParadoxFile, text []byte) (*tokens.TokenStream, []*report.DiagnosticItem) {
 	lex := NewLexer(file, text)
-
 	tokenStream := tokens.NewTokenStream()
 
 	for lex.hasMoreTokens() {
-		token := lex.getNextToken()
-		if token == nil {
-			continue
+		if token := lex.getNextToken(); token != nil {
+			tokenStream.Push(token)
 		}
-		tokenStream.Push(token)
 	}
 
 	return tokenStream, lex.Errors()
 }
 
-// remainder returns the remaining unprocessed text from the current cursor position
+// remainder returns the unprocessed text.
 func (lex *Lexer) remainder() []byte {
 	return lex.text[lex.cursor:]
 }
 
-// getNextToken processes and returns the next token from the input text.
-// It matches the remaining text against token patterns in a specific order,
-// handles special tokens like whitespace and newlines by updating line/column numbers,
-// and returns nil for ignored tokens. If no valid token is found, it reports an error
-// and advances the cursor to prevent infinite loops.
+// getNextToken retrieves the next token from the input text.
 func (lex *Lexer) getNextToken() *tokens.Token {
 	if !lex.hasMoreTokens() {
 		return nil
 	}
 
-	remainder := lex.remainder()
+	remaining := lex.remainder()
+	startLine, startColumn := lex.line, lex.column
 
-	var matchedToken []byte
-	var matchedTokenType tokens.TokenType
-
-	// Keep track of the initial line and column for the token
-	startLine := lex.line
-	startColumn := lex.column
-
-	// Try to match tokens in the specified order
+	// Attempt to match tokens in the specified order.
 	for _, tokenType := range tokens.TokenCheckOrder {
-		match := lex.patternMatcher.MatchToken(tokenType, remainder)
-		if match == nil {
-			continue
-		}
-
-		// Accept the first match
-		matchedToken = match
-		matchedTokenType = tokenType
-		break
-	}
-
-	if matchedToken != nil {
-		tokenValue := string(matchedToken)
-		lex.cursor += len(matchedToken)
-
-		switch matchedTokenType {
-		case tokens.TAB:
-			// Consider tab width as 4 spaces
-			lex.column += 4 // Already added 1 in len(longestMatch)
-			return nil
-		case tokens.NEXTLINE:
-			lex.line++
-			lex.column = 1
-
-			loc := tokens.LocFromParadoxFile(lex.file)
-			loc.Line = uint32(lex.line)
-			loc.Column = uint16(lex.column)
-			return tokens.New(tokenValue, matchedTokenType, *loc)
-		case tokens.WHITESPACE:
-			// Ignore whitespace
-			lex.column++
-			return nil
-		case tokens.COMMENT:
-			// Ignore comments
-			return nil
-		default:
-			lex.column += len(matchedToken)
-			loc := tokens.LocFromParadoxFile(lex.file)
-			loc.Line = uint32(startLine)
-			loc.Column = uint16(startColumn)
-			return tokens.New(tokenValue, matchedTokenType, *loc)
+		if match := lex.patternMatcher.MatchToken(tokenType, remaining); match != nil {
+			return lex.processMatch(tokenType, match, startLine, startColumn)
 		}
 	}
 
-	unexpectedChar := remainder[0]
+	lex.reportUnexpectedToken()
+	return nil
+}
+
+// processMatch handles a successful token match.
+func (lex *Lexer) processMatch(tokenType tokens.TokenType, match []byte, startLine, startColumn int) *tokens.Token {
+	tokenValue := string(match)
+	lex.cursor += len(match)
+
+	switch tokenType {
+	case tokens.TAB:
+		// Consider tab width as 4 spaces.
+		lex.column += 4
+		return nil
+	case tokens.NEXTLINE:
+		lex.line++
+		lex.column = 1
+		loc := tokens.LocFromParadoxFile(lex.file)
+		loc.Line = uint32(lex.line)
+		loc.Column = uint16(lex.column)
+		return tokens.New(tokenValue, tokenType, *loc)
+	case tokens.WHITESPACE:
+		lex.column++
+		return nil
+	case tokens.COMMENT:
+		return nil
+	default:
+		lex.column += len(match)
+		loc := tokens.LocFromParadoxFile(lex.file)
+		loc.Line = uint32(startLine)
+		loc.Column = uint16(startColumn)
+		return tokens.New(tokenValue, tokenType, *loc)
+	}
+}
+
+// reportUnexpectedToken logs an error for an unexpected token and advances the cursor.
+func (lex *Lexer) reportUnexpectedToken() {
+	remaining := lex.remainder()
+	unexpectedChar := remaining[0]
+
 	loc := tokens.LocFromParadoxFile(lex.file)
 	loc.Line = uint32(lex.line)
 	loc.Column = uint16(lex.column)
 	err := report.FromLoc(*loc, severity.Critical, fmt.Sprintf("unexpected token '%c'", unexpectedChar))
 	lex.AddError(err)
 
-	// Advance cursor to prevent infinite loop
+	// Advance to prevent an infinite loop.
 	lex.cursor++
 	lex.column++
-
-	return nil
 }

@@ -89,7 +89,7 @@ func (pc *ParseCommand) parseArgs(args []string) error {
 
 // parseFile reads and parses the specified file into an AST structure.
 func (pc *ParseCommand) parseFile(fullpath string) (*ast.AST, error) {
-	file := files.NewParadoxFile(fullpath, files.FileKind(files.Mod))
+	file := files.NewParadoxTxtFile(fullpath, files.FileKind(files.Mod))
 
 	ast, err := pdxfile.ParseFile(file)
 	if err != nil {

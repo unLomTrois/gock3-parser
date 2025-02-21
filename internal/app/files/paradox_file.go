@@ -5,10 +5,13 @@ import (
 	"path/filepath"
 )
 
+// FileKind represents the type of Paradox file (vanilla or mod).
 type FileKind uint8
 
 const (
+	// Vanilla file
 	Vanilla FileKind = iota
+	// Mod file
 	Mod
 )
 
@@ -23,15 +26,15 @@ type ParadoxFile interface {
 type ParadoxTxtFile struct {
 	// The full filesystem path of this file
 	fullpath string
-	// Index into the PathTable (optional, using *PathTableIndex to allow nil)
-	idx *PathTableIndex
 	// Whether it's a vanilla or mod file
 	kind FileKind
+	// Index into the PathTable (optional, using *PathTableIndex to allow nil)
+	idx *PathTableIndex
 }
 
-// NewParadoxFile is the constructor for ParadoxFile.
+// NewParadoxTxtFile is the constructor for ParadoxFile.
 // Ensures the path is valid and not empty.
-func NewParadoxFile(fullpath string, kind FileKind) *ParadoxTxtFile {
+func NewParadoxTxtFile(fullpath string, kind FileKind) *ParadoxTxtFile {
 	if _, err := os.Stat(fullpath); os.IsNotExist(err) {
 		panic("Invalid path: path does not exist")
 	}

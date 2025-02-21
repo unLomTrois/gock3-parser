@@ -12,7 +12,7 @@ import (
 )
 
 type Lexer struct {
-	fileEntry      *files.FileEntry
+	file           *files.ParadoxFile
 	text           []byte
 	cursor         int
 	line           int
@@ -22,9 +22,9 @@ type Lexer struct {
 }
 
 // NewLexer creates a new Lexer instance
-func NewLexer(entry *files.FileEntry, text []byte) *Lexer {
+func NewLexer(file *files.ParadoxFile, text []byte) *Lexer {
 	return &Lexer{
-		fileEntry:      entry,
+		file:           file,
 		text:           NormalizeText(text),
 		cursor:         0,
 		line:           1,
@@ -47,8 +47,8 @@ func (lex *Lexer) hasMoreTokens() bool {
 }
 
 // Scan tokenizes the entire input text
-func Scan(entry *files.FileEntry, text []byte) (*tokens.TokenStream, []*report.DiagnosticItem) {
-	lex := NewLexer(entry, text)
+func Scan(file *files.ParadoxFile, text []byte) (*tokens.TokenStream, []*report.DiagnosticItem) {
+	lex := NewLexer(file, text)
 
 	tokenStream := tokens.NewTokenStream()
 
@@ -113,7 +113,7 @@ func (lex *Lexer) getNextToken() *tokens.Token {
 			lex.line++
 			lex.column = 1
 
-			loc := tokens.LocFromFileEntry(lex.fileEntry)
+			loc := tokens.LocFromParadoxFile(lex.file)
 			loc.Line = uint32(lex.line)
 			loc.Column = uint16(lex.column)
 			return tokens.New(tokenValue, matchedTokenType, *loc)
@@ -126,7 +126,7 @@ func (lex *Lexer) getNextToken() *tokens.Token {
 			return nil
 		default:
 			lex.column += len(matchedToken)
-			loc := tokens.LocFromFileEntry(lex.fileEntry)
+			loc := tokens.LocFromParadoxFile(lex.file)
 			loc.Line = uint32(startLine)
 			loc.Column = uint16(startColumn)
 			return tokens.New(tokenValue, matchedTokenType, *loc)
@@ -134,7 +134,7 @@ func (lex *Lexer) getNextToken() *tokens.Token {
 	}
 
 	unexpectedChar := remainder[0]
-	loc := tokens.LocFromFileEntry(lex.fileEntry)
+	loc := tokens.LocFromParadoxFile(lex.file)
 	loc.Line = uint32(lex.line)
 	loc.Column = uint16(lex.column)
 	err := report.FromLoc(*loc, severity.Critical, fmt.Sprintf("unexpected token '%c'", unexpectedChar))

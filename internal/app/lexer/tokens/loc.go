@@ -7,26 +7,13 @@ import (
 	"github.com/unLomTrois/gock3/internal/app/files"
 )
 
-// Предполагаем, что PathTableIndex, FileKind, и MacroMapIndex уже определены
-
-// Loc представляет позицию сущности в файле
+// Loc представляет позицию токена в файле
 type Loc struct {
 	idx    files.PathTableIndex `json:"-"`
 	Line   uint32               `json:"line"`
 	Column uint16               `json:"column"`
 	kind   files.FileKind       `json:"-"`
 }
-
-// ForFile создает новый Loc для файла
-// func ForFile(pathname string, kind FileKind, fullpath string) Loc {
-// 	idx := PATHTABLE.Store(fullpath)
-// 	return Loc{
-// 		idx:    *idx,
-// 		kind:   kind,
-// 		Line:   0,
-// 		Column: 0,
-// 	}
-// }
 
 // Filename возвращает имя файла из Loc
 func (loc *Loc) Filename() (string, error) {
@@ -66,12 +53,12 @@ func (loc *Loc) SameFile(other Loc) bool {
 	return loc.idx == other.idx
 }
 
-// LocFromFileEntry создает Loc из FileEntry
-func LocFromFileEntry(entry *files.FileEntry) *Loc {
-	idx := entry.StoreInPathTable()
+// LocFromParadoxFile создает Loc из ParadoxFile
+func LocFromParadoxFile(file *files.ParadoxFile) *Loc {
+	idx := file.StoreInPathTable()
 	return &Loc{
 		idx:    *idx,
-		kind:   entry.Kind(),
+		kind:   file.Kind(),
 		Line:   1,
 		Column: 1,
 	}

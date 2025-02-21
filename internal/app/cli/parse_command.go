@@ -89,9 +89,9 @@ func (pc *ParseCommand) parseArgs(args []string) error {
 
 // parseFile reads and parses the specified file into an AST structure.
 func (pc *ParseCommand) parseFile(fullpath string) (*ast.AST, error) {
-	fileEntry := files.NewFileEntry(fullpath, files.FileKind(files.Mod))
+	file := files.NewParadoxFile(fullpath, files.FileKind(files.Mod))
 
-	ast, err := pdxfile.ParseFile(fileEntry)
+	ast, err := pdxfile.ParseFile(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse file: %w", err)
 	}

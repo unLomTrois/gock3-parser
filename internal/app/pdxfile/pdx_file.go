@@ -14,23 +14,23 @@ import (
 	"github.com/unLomTrois/gock3/pkg/report"
 )
 
-func ParseFile(entry *files.FileEntry) (*ast.AST, error) {
-	content, err := utils.ReadFileWithUTF8BOM(entry.FullPath())
+func ParseFile(file *files.ParadoxFile) (*ast.AST, error) {
+	content, err := utils.ReadFileWithUTF8BOM(file.FullPath())
 	if err != nil {
 		return nil, fmt.Errorf("reading file: %w", err)
 	}
 
 	diagnostics := []*report.DiagnosticItem{}
 
-	tokenStream, lexerErrors := lexer.Scan(entry, content)
+	tokenStream, lexerErrors := lexer.Scan(file, content)
 	diagnostics = append(diagnostics, lexerErrors...)
 
 	fileBlock, parserErrors := parser.Parse(tokenStream)
 	diagnostics = append(diagnostics, parserErrors...)
 
 	ast := &ast.AST{
-		Filename: entry.FileName(),
-		Fullpath: entry.FullPath(),
+		Filename: file.FileName(),
+		Fullpath: file.FullPath(),
 		Block:    fileBlock,
 	}
 

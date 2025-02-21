@@ -1,6 +1,6 @@
 package ast
 
-import "github.com/unLomTrois/gock3/internal/app/lexer/tokens"
+import "github.com/unLomTrois/gock3/pkg/lexer/tokens"
 
 type Field struct {
 	Key      *tokens.Token `json:"key"`

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/unLomTrois/gock3/internal/app/lexer/tokens"
+	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
 	"github.com/unLomTrois/gock3/pkg/report"
 	"github.com/unLomTrois/gock3/pkg/report/severity"
 )

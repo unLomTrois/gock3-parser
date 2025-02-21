@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"github.com/unLomTrois/gock3/internal/app/lexer/tokens"
+	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
 )
 
 // type that can be a Block or a Token

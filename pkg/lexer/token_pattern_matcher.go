@@ -5,7 +5,7 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/unLomTrois/gock3/internal/app/lexer/tokens"
+	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
 )
 
 // TokenPatternMatcher is a structure for working with token regular expressions

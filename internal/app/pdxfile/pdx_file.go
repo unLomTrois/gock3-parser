@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/unLomTrois/gock3/internal/app/lexer"
 	"github.com/unLomTrois/gock3/internal/app/parser"
 	"github.com/unLomTrois/gock3/internal/app/parser/ast"
 	"github.com/unLomTrois/gock3/internal/app/utils"
 	"github.com/unLomTrois/gock3/pkg/cache"
 	"github.com/unLomTrois/gock3/pkg/files"
+	"github.com/unLomTrois/gock3/pkg/lexer"
 	"github.com/unLomTrois/gock3/pkg/report"
 )
 

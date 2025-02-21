@@ -11,11 +11,10 @@ import (
 )
 
 // Expect verifies that the current token matches one of the expected types.
-// If it does, it consumes the token and returns it.
-// If not, it reports an error, attempts to recover, and returns nil.
+// If it does, it consumes and returns the token.
+// Otherwise, it reports an error and attempts to recover.
 func (p *Parser) Expect(expectedTypes ...tokens.TokenType) *tokens.Token {
 	token := p.currentToken
-
 	if token == nil {
 		errMsg := fmt.Sprintf(errUnexpectedEOF, formatTokenTypes(expectedTypes))
 		err := report.FromLoc(*p.loc, severity.Error, errMsg)
@@ -23,39 +22,27 @@ func (p *Parser) Expect(expectedTypes ...tokens.TokenType) *tokens.Token {
 		return nil
 	}
 
-	// Check if current token matches any expected type
-	for _, expectedType := range expectedTypes {
-		if token.Type == expectedType {
+	for _, et := range expectedTypes {
+		if token.Type == et {
 			p.nextToken()
 			return token
 		}
 	}
 
-	// Token didn't match - report error and try to recover
-	errMsg := fmt.Sprintf(errUnexpectedToken,
-		token.Value,
-		token.Type,
-		formatTokenTypes(expectedTypes),
-	)
+	errMsg := fmt.Sprintf(errUnexpectedToken, token.Value, token.Type, formatTokenTypes(expectedTypes))
 	err := report.FromToken(token, severity.Error, errMsg)
 	p.AddError(err)
 
-	// Create a recovery point based on the expected types
 	recoveryPoint := RecoveryPoint{
 		TokenTypes: expectedTypes,
 		Context:    "expected " + formatTokenTypes(expectedTypes),
 	}
 
-	// Attempt to recover
-	if _, recovered := p.synchronize(recoveryPoint); recovered {
-		return nil
-	}
-
-	// Recovery failed
+	p.synchronize(recoveryPoint) // attempt recovery regardless
 	return nil
 }
 
-// unquoteExpect parses a quoted string, unquotes it, and returns the token.
+// unquoteExpect parses and unquotes a quoted string token.
 func (p *Parser) unquoteExpect(expectedType tokens.TokenType) *tokens.Token {
 	token := p.Expect(expectedType)
 	if token == nil {

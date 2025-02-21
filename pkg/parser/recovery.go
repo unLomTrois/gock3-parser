@@ -15,7 +15,7 @@ const (
 	maxTokensToSkip     = 50
 )
 
-// RecoveryPoint represents a stable point in the grammar where parsing can resume.
+// RecoveryPoint represents a safe point in the grammar where parsing can resume.
 type RecoveryPoint struct {
 	TokenTypes []tokens.TokenType
 	Context    string
@@ -52,10 +52,8 @@ var (
 	}
 
 	FieldListRecovery = RecoveryPoint{
-		TokenTypes: []tokens.TokenType{
-			tokens.END, tokens.WORD, tokens.DATE,
-		},
-		Context: "field list",
+		TokenTypes: []tokens.TokenType{tokens.END, tokens.WORD, tokens.DATE},
+		Context:    "field list",
 	}
 
 	LiteralRecovery = RecoveryPoint{
@@ -71,7 +69,7 @@ var (
 	}
 )
 
-// synchronize attempts to recover from parsing errors by finding a stable point.
+// synchronize attempts to recover from parsing errors by advancing tokens until a recovery token is found.
 func (p *Parser) synchronize(point RecoveryPoint) (*tokens.Token, bool) {
 	attempts := 0
 	skippedTokens := 0
@@ -100,34 +98,25 @@ func (p *Parser) synchronize(point RecoveryPoint) (*tokens.Token, bool) {
 		skippedTokens++
 	}
 
-	// Failed to recover.
 	p.reportRecoveryFailure(startLoc, point.Context)
 	return nil, false
 }
 
-// reportSkippedSection reports the tokens that were skipped during recovery.
+// reportSkippedSection logs the tokens skipped during recovery.
 func (p *Parser) reportSkippedSection(startLoc tokens.Loc, skipped []*tokens.Token, context string) {
 	var skippedValues []string
 	for _, t := range skipped {
 		skippedValues = append(skippedValues, fmt.Sprintf("%s (%s)", t.Value, t.Type))
 	}
 
-	errMsg := fmt.Sprintf(
-		"Skipped invalid syntax in %q: %q",
-		context,
-		strings.Join(skippedValues, ", "),
-	)
-
+	errMsg := fmt.Sprintf("Skipped invalid syntax in %q: %q", context, strings.Join(skippedValues, ", "))
 	err := report.FromLoc(startLoc, severity.Warning, errMsg)
 	p.AddError(err)
 }
 
-// reportRecoveryFailure reports when the parser couldn't recover.
+// reportRecoveryFailure logs a failure to recover.
 func (p *Parser) reportRecoveryFailure(startLoc tokens.Loc, context string) {
-	errMsg := fmt.Sprintf(
-		"Failed to recover while parsing %s - too many invalid tokens",
-		context,
-	)
+	errMsg := fmt.Sprintf("Failed to recover while parsing %s - too many invalid tokens", context)
 	err := report.FromLoc(startLoc, severity.Error, errMsg)
 	p.AddError(err)
 }

@@ -8,15 +8,17 @@ import (
 	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
 )
 
-// Helper functions for token type checks.
+// isKeyToken checks if a token type is a valid key.
 func isKeyToken(tokenType tokens.TokenType) bool {
 	return tokenType == tokens.WORD || tokenType == tokens.DATE || tokenType == tokens.NUMBER
 }
 
+// isOperatorToken checks if a token type is a valid operator.
 func isOperatorToken(tokenType tokens.TokenType) bool {
 	return isEqualOperatorToken(tokenType) || tokenType == tokens.COMPARISON
 }
 
+// isEqualOperatorToken checks if a token type is an equality operator.
 func isEqualOperatorToken(tokenType tokens.TokenType) bool {
 	return tokenType == tokens.EQUALS || tokenType == tokens.QUESTION_EQUALS
 }
@@ -31,29 +33,19 @@ func isLiteralType(tokenType tokens.TokenType) bool {
 	}
 }
 
-// formatTokenTypes formats a slice of TokenType into a readable string.
+// formatTokenTypes formats a slice of TokenType into a human-readable string.
 func formatTokenTypes(types []tokens.TokenType) string {
 	if len(types) == 0 {
 		return "no token types specified"
 	}
-
-	if len(types) == 1 {
-		return fmt.Sprintf("%q", types[0])
-	}
-
 	parts := make([]string, len(types))
 	for i, t := range types {
 		parts[i] = fmt.Sprintf("%q", t)
 	}
-
-	// For two types use "x or y"
-	if len(types) == 2 {
+	if len(parts) == 1 {
+		return parts[0]
+	} else if len(parts) == 2 {
 		return fmt.Sprintf("%s or %s", parts[0], parts[1])
 	}
-
-	// For more than two types use "x, y, or z"
-	return fmt.Sprintf("%s, or %s",
-		strings.Join(parts[:len(parts)-1], ", "),
-		parts[len(parts)-1],
-	)
+	return fmt.Sprintf("%s, or %s", strings.Join(parts[:len(parts)-1], ", "), parts[len(parts)-1])
 }

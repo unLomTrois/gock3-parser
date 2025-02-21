@@ -13,10 +13,9 @@ import (
 // fileBlock parses the entire file and constructs the AST's FileBlock.
 func (p *Parser) fileBlock() *ast.FileBlock {
 	if p.currentToken == nil {
-		// Empty file
+		// Empty file.
 		return &ast.FileBlock{Values: []*ast.Field{}, Loc: tokens.Loc{}}
 	}
-
 	loc := p.loc
 	fields := p.FieldList()
 	return &ast.FileBlock{Values: fields, Loc: *loc}
@@ -24,7 +23,7 @@ func (p *Parser) fileBlock() *ast.FileBlock {
 
 // FieldList parses a list of fields until a stop token is encountered.
 func (p *Parser) FieldList(stopLookahead ...tokens.TokenType) []*ast.Field {
-	fields := make([]*ast.Field, 0)
+	var fields []*ast.Field
 
 	for p.currentToken != nil {
 		// Check for stop tokens to end the field list
@@ -35,29 +34,28 @@ func (p *Parser) FieldList(stopLookahead ...tokens.TokenType) []*ast.Field {
 		switch p.currentToken.Type {
 		case tokens.NEXTLINE:
 			p.skipTokens(tokens.NEXTLINE)
-			continue
+			// continue
 		case tokens.WORD, tokens.DATE, tokens.NUMBER:
-			field := p.Field()
-			if field != nil {
+			if field := p.Field(); field != nil {
 				fields = append(fields, field)
 			}
 		default:
 			// Handle unexpected token
 			errMsg := fmt.Sprintf(errFieldListUnexpectedToken, p.currentToken.Value, p.currentToken.Type)
 			err := report.FromToken(p.currentToken, severity.Error, errMsg)
-
-			path, e := p.currentToken.Loc.Fullpath()
-			if e != nil {
-				return nil
-			}
-			panic(path)
 			p.AddError(err)
+
+			if fullPath, errPath := p.currentToken.Loc.Fullpath(); errPath == nil {
+				_ = fullPath // Optionally, log or use the full path.
+			} else {
+				p.AddError(report.FromLoc(*p.loc, severity.Error, errPath.Error()))
+			}
+
 			if _, recovered := p.synchronize(FieldListRecovery); !recovered {
-				return fields // Stop parsing if recovery fails
+				return fields
 			}
 		}
 	}
-
 	return fields
 }
 
@@ -70,15 +68,12 @@ func (p *Parser) Field() *ast.Field {
 		errMsg := fmt.Sprintf(errUnexpectedFieldToken, p.currentToken.Value, p.currentToken.Type)
 		err := report.FromToken(p.currentToken, severity.Error, errMsg)
 		p.AddError(err)
-
-		if _, recovered := p.synchronize(FieldRecovery); !recovered {
-			return nil // Stop parsing if recovery fails
-		}
-		return nil // Return nil after synchronization
+		p.synchronize(FieldRecovery)
+		return nil
 	}
 }
 
-// ExpressionNode parses an expression node and returns the corresponding AST node.
+// ExpressionNode parses an expression and returns an AST Field node.
 func (p *Parser) ExpressionNode() *ast.Field {
 	key := p.Key()
 	if key == nil {
@@ -118,11 +113,8 @@ func (p *Parser) Key() *tokens.Token {
 		errMsg := fmt.Sprintf("Expected a key (WORD, DATE, or NUMBER), but found %q of type %q", p.currentToken.Value, p.currentToken.Type)
 		err := report.FromToken(p.currentToken, severity.Error, errMsg)
 		p.AddError(err)
-
-		if _, recovered := p.synchronize(KeyRecovery); !recovered {
-			return nil
-		}
-		return nil // Return nil after synchronization
+		p.synchronize(KeyRecovery)
+		return nil
 	}
 }
 
@@ -136,22 +128,14 @@ func (p *Parser) Operator() *tokens.Token {
 	}
 
 	switch p.currentToken.Type {
-	case tokens.QUESTION_EQUALS:
-		return p.Expect(tokens.QUESTION_EQUALS)
-	case tokens.EQUALS:
-		return p.Expect(tokens.EQUALS)
-	case tokens.COMPARISON:
-		return p.Expect(tokens.COMPARISON)
+	case tokens.QUESTION_EQUALS, tokens.EQUALS, tokens.COMPARISON:
+		return p.Expect(p.currentToken.Type)
 	default:
 		errMsg := fmt.Sprintf(errOperatorUnexpectedToken, p.currentToken.Value, p.currentToken.Type)
 		err := report.FromToken(p.currentToken, severity.Error, errMsg)
 		p.AddError(err)
-
-		if _, recovered := p.synchronize(ValueRecovery); !recovered {
-			return nil // Stop parsing if recovery fails
-		}
-
-		return nil // Return nil after synchronization
+		p.synchronize(ValueRecovery)
+		return nil
 	}
 }
 
@@ -188,7 +172,7 @@ func (p *Parser) EmptyValue() ast.BlockOrValue {
 	}
 }
 
-// Literal parses a literal token and returns the corresponding token.
+// Literal parses a literal token and returns it.
 func (p *Parser) Literal() *tokens.Token {
 	if p.currentToken == nil {
 		err := report.FromLoc(*p.loc, severity.Error, errLiteralExpectedEOF)
@@ -198,20 +182,15 @@ func (p *Parser) Literal() *tokens.Token {
 
 	switch p.currentToken.Type {
 	case tokens.WORD, tokens.NUMBER, tokens.BOOL, tokens.DATE:
-		if token := p.Expect(p.currentToken.Type); token != nil {
-			return token
-		}
+		return p.Expect(p.currentToken.Type)
 	case tokens.QUOTED_STRING:
-		if token := p.unquoteExpect(tokens.QUOTED_STRING); token != nil {
-			return token
-		}
+		return p.unquoteExpect(tokens.QUOTED_STRING)
 	default:
 		errMsg := fmt.Sprintf(errLiteralUnexpectedToken, p.currentToken.Value, p.currentToken.Type)
 		err := report.FromToken(p.currentToken, severity.Error, errMsg)
 		p.AddError(err)
 	}
 
-	// Attempt recovery for any failure case
 	if token, recovered := p.synchronize(LiteralRecovery); recovered {
 		// Try parsing literal again from recovery point
 		if isLiteralType(token.Type) {

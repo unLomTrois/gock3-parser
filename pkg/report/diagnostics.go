@@ -43,7 +43,7 @@ func FromToken(token *tokens.Token, severity severity.Severity, msg string) *Dia
 	}
 }
 
-func FromFile(file *files.ParadoxFile, severity severity.Severity, msg string) *DiagnosticItem {
+func FromFile(file files.ParadoxFile, severity severity.Severity, msg string) *DiagnosticItem {
 	loc := tokens.LocFromParadoxFile(file)
 
 	return &DiagnosticItem{

@@ -14,7 +14,7 @@ import (
 	"github.com/unLomTrois/gock3/pkg/report"
 )
 
-func ParseFile(file *files.ParadoxFile) (*ast.AST, error) {
+func ParseFile(file files.ParadoxFile) (*ast.AST, error) {
 	content, err := utils.ReadFileWithUTF8BOM(file.FullPath())
 	if err != nil {
 		return nil, fmt.Errorf("reading file: %w", err)

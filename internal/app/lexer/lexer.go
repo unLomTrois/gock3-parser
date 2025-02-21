@@ -12,7 +12,7 @@ import (
 )
 
 type Lexer struct {
-	file           *files.ParadoxFile
+	file           files.ParadoxFile
 	text           []byte
 	cursor         int
 	line           int
@@ -22,7 +22,7 @@ type Lexer struct {
 }
 
 // NewLexer creates a new Lexer instance
-func NewLexer(file *files.ParadoxFile, text []byte) *Lexer {
+func NewLexer(file files.ParadoxFile, text []byte) *Lexer {
 	return &Lexer{
 		file:           file,
 		text:           NormalizeText(text),
@@ -47,7 +47,7 @@ func (lex *Lexer) hasMoreTokens() bool {
 }
 
 // Scan tokenizes the entire input text
-func Scan(file *files.ParadoxFile, text []byte) (*tokens.TokenStream, []*report.DiagnosticItem) {
+func Scan(file files.ParadoxFile, text []byte) (*tokens.TokenStream, []*report.DiagnosticItem) {
 	lex := NewLexer(file, text)
 
 	tokenStream := tokens.NewTokenStream()

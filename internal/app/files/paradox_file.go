@@ -12,7 +12,15 @@ const (
 	Mod
 )
 
-type ParadoxFile struct {
+type ParadoxFile interface {
+	FullPath() string
+	FileName() string
+	Kind() FileKind
+	PathIdx() *PathTableIndex
+	StoreInPathTable() *PathTableIndex
+}
+
+type ParadoxTxtFile struct {
 	// The full filesystem path of this file
 	fullpath string
 	// Index into the PathTable (optional, using *PathTableIndex to allow nil)
@@ -23,12 +31,12 @@ type ParadoxFile struct {
 
 // NewParadoxFile is the constructor for ParadoxFile.
 // Ensures the path is valid and not empty.
-func NewParadoxFile(fullpath string, kind FileKind) *ParadoxFile {
+func NewParadoxFile(fullpath string, kind FileKind) *ParadoxTxtFile {
 	if _, err := os.Stat(fullpath); os.IsNotExist(err) {
 		panic("Invalid path: path does not exist")
 	}
 
-	return &ParadoxFile{
+	return &ParadoxTxtFile{
 		fullpath: fullpath,
 		kind:     kind,
 		idx:      nil,
@@ -36,29 +44,30 @@ func NewParadoxFile(fullpath string, kind FileKind) *ParadoxFile {
 }
 
 // Kind returns the file kind (vanilla or mod).
-func (fe *ParadoxFile) Kind() FileKind {
-	return fe.kind
+func (file *ParadoxTxtFile) Kind() FileKind {
+	return file.kind
 }
 
 // FullPath returns the full filesystem path.
-func (fe *ParadoxFile) FullPath() string {
-	return fe.fullpath
+func (file *ParadoxTxtFile) FullPath() string {
+	return file.fullpath
 }
 
 // FileName returns the file name, ensuring it's not empty.
-func (fe *ParadoxFile) FileName() string {
-	return filepath.Base(fe.fullpath)
+func (file *ParadoxTxtFile) FileName() string {
+	return filepath.Base(file.fullpath)
 }
 
-func (fe *ParadoxFile) StoreInPathTable() *PathTableIndex {
-	if fe.idx != nil {
-		return fe.idx
+// StoreInPathTable stores the file in the PathTable and returns the index.
+func (file *ParadoxTxtFile) StoreInPathTable() *PathTableIndex {
+	if file.idx != nil {
+		return file.idx
 	}
-	fe.idx = PATHTABLE.Store(fe.fullpath)
-	return fe.idx
+	file.idx = PATHTABLE.Store(file.fullpath)
+	return file.idx
 }
 
 // PathIdx returns the index into the PathTable if it exists, otherwise nil.
-func (fe *ParadoxFile) PathIdx() *PathTableIndex {
-	return fe.idx
+func (file *ParadoxTxtFile) PathIdx() *PathTableIndex {
+	return file.idx
 }

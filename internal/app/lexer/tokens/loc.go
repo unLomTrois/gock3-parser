@@ -54,7 +54,7 @@ func (loc *Loc) SameFile(other Loc) bool {
 }
 
 // LocFromParadoxFile создает Loc из ParadoxFile
-func LocFromParadoxFile(file *files.ParadoxFile) *Loc {
+func LocFromParadoxFile(file files.ParadoxFile) *Loc {
 	idx := file.StoreInPathTable()
 	return &Loc{
 		idx:    *idx,

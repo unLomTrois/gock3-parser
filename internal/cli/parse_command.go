@@ -8,8 +8,8 @@ import (
 
 	"github.com/unLomTrois/gock3/internal/utils"
 	"github.com/unLomTrois/gock3/pkg/files"
+	"github.com/unLomTrois/gock3/pkg/parser"
 	"github.com/unLomTrois/gock3/pkg/parser/ast"
-	"github.com/unLomTrois/gock3/pkg/pdxfile"
 )
 
 type ParseCommand struct {
@@ -91,7 +91,7 @@ func (pc *ParseCommand) parseArgs(args []string) error {
 func (pc *ParseCommand) parseFile(fullpath string) (*ast.AST, error) {
 	file := files.NewParadoxTxtFile(fullpath, files.FileKind(files.Mod))
 
-	ast, err := pdxfile.ParseFile(file)
+	ast, err := parser.ParseParadoxFile(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse file: %w", err)
 	}

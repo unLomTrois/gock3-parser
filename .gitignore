@@ -29,3 +29,4 @@ configs/*.json
 tmp
 
 **/tokenstream.json
+ast.json

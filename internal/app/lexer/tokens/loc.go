@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/unLomTrois/gock3/internal/app/files"
+	"github.com/unLomTrois/gock3/pkg/files"
 )
 
 // Loc представляет позицию токена в файле

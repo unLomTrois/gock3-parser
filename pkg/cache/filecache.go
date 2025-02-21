@@ -4,8 +4,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/unLomTrois/gock3/internal/app/files"
 	"github.com/unLomTrois/gock3/internal/app/lexer/tokens"
+	"github.com/unLomTrois/gock3/pkg/files"
 )
 
 type FileCache struct {

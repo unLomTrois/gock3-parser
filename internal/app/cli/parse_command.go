@@ -6,10 +6,10 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/unLomTrois/gock3/internal/app/files"
 	"github.com/unLomTrois/gock3/internal/app/parser/ast"
 	"github.com/unLomTrois/gock3/internal/app/pdxfile"
 	"github.com/unLomTrois/gock3/internal/app/utils"
+	"github.com/unLomTrois/gock3/pkg/files"
 )
 
 type ParseCommand struct {

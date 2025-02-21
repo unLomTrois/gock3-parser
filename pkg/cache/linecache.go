@@ -1,6 +1,6 @@
 package cache
 
-import "github.com/unLomTrois/gock3/internal/app/files"
+import "github.com/unLomTrois/gock3/pkg/files"
 
 type LineCache struct {
 	cache map[files.PathTableIndex][]string

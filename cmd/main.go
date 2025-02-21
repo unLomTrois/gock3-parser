@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/unLomTrois/gock3/internal/app/cli"
+	"github.com/unLomTrois/gock3/internal/cli"
 )
 
 func main() {

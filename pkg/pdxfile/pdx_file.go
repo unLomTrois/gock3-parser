@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/unLomTrois/gock3/internal/app/utils"
+	"github.com/unLomTrois/gock3/internal/utils"
 	"github.com/unLomTrois/gock3/pkg/cache"
 	"github.com/unLomTrois/gock3/pkg/files"
 	"github.com/unLomTrois/gock3/pkg/lexer"

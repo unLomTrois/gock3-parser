@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/unLomTrois/gock3/internal/app/cli"
+	"github.com/unLomTrois/gock3/internal/cli"
 	// If you need to mock or intercept calls in pdxfile/utils,
 	// import them and use a test double approach.
 )

@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"github.com/unLomTrois/gock3/internal/app/parser/ast"
 	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
+	"github.com/unLomTrois/gock3/pkg/parser/ast"
 	"github.com/unLomTrois/gock3/pkg/report"
 )
 

@@ -3,9 +3,9 @@ package report
 import (
 	"fmt"
 
-	"github.com/unLomTrois/gock3/internal/app/parser/ast"
 	"github.com/unLomTrois/gock3/pkg/files"
 	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
+	"github.com/unLomTrois/gock3/pkg/parser/ast"
 	"github.com/unLomTrois/gock3/pkg/report/severity"
 )
 

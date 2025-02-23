@@ -8,6 +8,11 @@ import (
 	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
 )
 
+// isNextField determines if the upcoming tokens likely form a field.
+func (p *Parser) isNextField() bool {
+	return isKeyToken(p.currentToken.Type) && isOperatorToken(p.lookahead.Type)
+}
+
 // isKeyToken checks if a token type is a valid key.
 func isKeyToken(tokenType tokens.TokenType) bool {
 	return tokenType == tokens.WORD || tokenType == tokens.DATE || tokenType == tokens.NUMBER

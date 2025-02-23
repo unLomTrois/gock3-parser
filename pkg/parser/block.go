@@ -67,11 +67,6 @@ func (p *Parser) skipTokens(types ...tokens.TokenType) {
 	}
 }
 
-// isNextField determines if the upcoming tokens likely form a field.
-func (p *Parser) isNextField() bool {
-	return isKeyToken(p.currentToken.Type) && isOperatorToken(p.lookahead.Type)
-}
-
 // FieldBlock parses a block of fields and returns the corresponding AST node.
 func (p *Parser) FieldBlock(loc tokens.Loc) *ast.FieldBlock {
 	fields := p.FieldList(tokens.END)

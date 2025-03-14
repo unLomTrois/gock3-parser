@@ -15,12 +15,17 @@ const (
 	Mod
 )
 
+// ParadoxFile is a core interface that represents a file in the Paradox game engine file system.
+// It provides an abstraction for working with different types of game files (vanilla or mod),
+// manages file paths, and integrates with the path table system for efficient file path indexing.
+// This interface is used throughout the parser pipeline for lexing, parsing, and error reporting,
+// serving as a foundation for handling all Paradox game file operations.
 type ParadoxFile interface {
-	FullPath() string
-	FileName() string
-	Kind() FileKind
-	PathIdx() *PathTableIndex
-	StoreInPathTable() *PathTableIndex
+	FullPath() string                  // Returns the full filesystem path
+	FileName() string                  // Returns just the filename
+	Kind() FileKind                    // Returns whether it's a vanilla or mod file
+	PathIdx() *PathTableIndex          // Returns index in the path table if exists
+	StoreInPathTable() *PathTableIndex // Stores the file in path table and returns its index
 }
 
 type ParadoxTxtFile struct {

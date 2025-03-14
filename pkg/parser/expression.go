@@ -4,7 +4,7 @@ package parser
 import (
 	"fmt"
 
-	"github.com/unLomTrois/gock3/pkg/parser/ast"
+	"github.com/unLomTrois/gock3/pkg/ast"
 	"github.com/unLomTrois/gock3/pkg/report"
 	"github.com/unLomTrois/gock3/pkg/report/severity"
 	"github.com/unLomTrois/gock3/pkg/tokens"

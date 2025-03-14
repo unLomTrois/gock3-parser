@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/unLomTrois/gock3/internal/utils"
+	"github.com/unLomTrois/gock3/pkg/ast"
 	"github.com/unLomTrois/gock3/pkg/files"
 	"github.com/unLomTrois/gock3/pkg/parser"
-	"github.com/unLomTrois/gock3/pkg/parser/ast"
 )
 
 type ParseCommand struct {

@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/unLomTrois/gock3/pkg/files"
-	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
 	"github.com/unLomTrois/gock3/pkg/report"
 	"github.com/unLomTrois/gock3/pkg/report/severity"
+	"github.com/unLomTrois/gock3/pkg/tokens"
 )
 
 type Lexer struct {

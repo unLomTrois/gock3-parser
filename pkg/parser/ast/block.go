@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
+	"github.com/unLomTrois/gock3/pkg/tokens"
 )
 
 // BlockOrValue represents an element in the AST that can be either a block or a literal value.
@@ -128,3 +128,4 @@ type EmptyValue struct {
 }
 
 func (ev EmptyValue) IsBlockOrValue() {}
+

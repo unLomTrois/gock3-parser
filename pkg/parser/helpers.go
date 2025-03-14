@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
+	"github.com/unLomTrois/gock3/pkg/tokens"
 )
 
 // isNextField determines if the upcoming tokens likely form a field.

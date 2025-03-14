@@ -4,10 +4,10 @@ package parser
 import (
 	"fmt"
 
-	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
 	"github.com/unLomTrois/gock3/pkg/parser/ast"
 	"github.com/unLomTrois/gock3/pkg/report"
 	"github.com/unLomTrois/gock3/pkg/report/severity"
+	"github.com/unLomTrois/gock3/pkg/tokens"
 )
 
 // Block parses a block and returns the corresponding AST node.

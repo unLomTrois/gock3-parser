@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
 	"github.com/unLomTrois/gock3/pkg/report"
 	"github.com/unLomTrois/gock3/pkg/report/severity"
+	"github.com/unLomTrois/gock3/pkg/tokens"
 )
 
 // Expect verifies that the current token matches one of the expected types.

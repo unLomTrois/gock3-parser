@@ -41,8 +41,6 @@ func (loc *Loc) Fullpath() (string, error) {
 		return "", err
 	}
 
-	// fullpathWithLoc := fullpath + ":" + loc.Line + ":" + loc.Column
-
 	fullpathWithLoc := fmt.Sprintf("%s:%d:%d", fullpath, loc.Line, loc.Column)
 
 	return fullpathWithLoc, nil

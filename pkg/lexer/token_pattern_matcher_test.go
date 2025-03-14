@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
+	"github.com/unLomTrois/gock3/pkg/tokens"
 )
 
 func TestNewTokenPatternMatcher(t *testing.T) {

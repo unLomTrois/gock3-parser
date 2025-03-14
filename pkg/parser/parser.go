@@ -8,9 +8,9 @@ import (
 	"github.com/unLomTrois/gock3/pkg/cache"
 	"github.com/unLomTrois/gock3/pkg/files"
 	"github.com/unLomTrois/gock3/pkg/lexer"
-	"github.com/unLomTrois/gock3/pkg/lexer/tokens"
 	"github.com/unLomTrois/gock3/pkg/parser/ast"
 	"github.com/unLomTrois/gock3/pkg/report"
+	"github.com/unLomTrois/gock3/pkg/tokens"
 )
 
 // Parser represents the stateful parser for Paradox files.

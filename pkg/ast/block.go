@@ -9,6 +9,8 @@ type BlockOrValue interface {
 	IsBlockOrValue()
 }
 
+// Note: tokens.Token is exempt from Node interface requirement as it's in a different package
+
 // Block represents a block of fields or tokens in the AST.
 type Block interface {
 	BlockOrValue
@@ -26,6 +28,9 @@ type FieldBlock struct {
 
 func (fb *FieldBlock) IsBlock()        {}
 func (fb *FieldBlock) IsBlockOrValue() {}
+func (fb *FieldBlock) GetLoc() tokens.Loc {
+	return fb.Loc
+}
 
 // GetValues returns the list of fields in the block.
 func (fb *FieldBlock) GetValues() []*Field {
@@ -117,15 +122,21 @@ func (fb *FieldBlock) GetTokenBlock(key string) *TokenBlock {
 // TokenBlock represents a block that contains a list of literal tokens.
 type TokenBlock struct {
 	Values []*tokens.Token `json:"tokens"`
+	Loc    tokens.Loc      `json:"-"` // Added Loc field for location tracking
 }
 
 func (tb *TokenBlock) IsBlock()        {}
 func (tb *TokenBlock) IsBlockOrValue() {}
+func (tb *TokenBlock) GetLoc() tokens.Loc {
+	return tb.Loc
+}
 
 // EmptyValue represents an empty value in the AST.
 type EmptyValue struct {
 	Loc tokens.Loc `json:"-"`
 }
 
-func (ev EmptyValue) IsBlockOrValue() {}
-
+func (ev *EmptyValue) IsBlockOrValue() {}
+func (ev *EmptyValue) GetLoc() tokens.Loc {
+	return ev.Loc
+}

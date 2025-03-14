@@ -8,3 +8,7 @@ type Field struct {
 	Operator *tokens.Token `json:"operator"`
 	Value    BlockOrValue  `json:"value"`
 }
+
+func (f *Field) GetLoc() tokens.Loc {
+	return f.Key.Loc
+}

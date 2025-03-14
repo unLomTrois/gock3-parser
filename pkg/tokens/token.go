@@ -19,7 +19,13 @@ func New(value string, tokenType TokenType, loc Loc) *Token {
 	}
 }
 
+// IsBlockOrValue implements the BlockOrValue interface
 func (t *Token) IsBlockOrValue() {}
+
+// GetLoc returns the token's location
+func (t *Token) GetLoc() Loc {
+	return t.Loc
+}
 
 func (t *Token) String() string {
 	return fmt.Sprintf("type:\t%v,\tvalue:\t%v", t.Type, strconv.Quote(string(t.Value)))

@@ -167,7 +167,7 @@ func (p *Parser) Value() ast.BlockOrValue {
 
 // EmptyValue returns an empty value AST node.
 func (p *Parser) EmptyValue() ast.BlockOrValue {
-	return ast.EmptyValue{
+	return &ast.EmptyValue{
 		Loc: *p.loc,
 	}
 }
